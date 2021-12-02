@@ -53,7 +53,7 @@ async def on_message(message:discord.Message):
 				return
 	if dc.user in message.mentions and "invite" in message.content.lower():
 		await message.channel.send(
-			discord.utils.oauth_url(dc.user.id, 68608)
+			discord.utils.oauth_url(dc.user.id, discord.Permissions(68608))
 		)
 
 
