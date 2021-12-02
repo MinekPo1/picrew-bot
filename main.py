@@ -5,7 +5,10 @@ import requests
 
 dc = discord.Client()
 
-webhook = "https://discord.com/api/webhooks/916097212482744381/0RRUdfJAgJVcf5TEKXQTVnlo3yVWSYeq91CwEFYZ3ePDeyB7IqApsvUMYSmg66r4e61F"
+webhook = ("https://discord.com/api/webhooks/"
+	"916097212482744381/"
+	"0RRUdfJAgJVcf5TEKXQTVnlo3yVWSYeq91CwEFYZ3ePDeyB7IqApsvUMYSmg66r4e61F"
+)
 
 
 @dc.event
@@ -31,7 +34,7 @@ async def on_message(message:discord.Message):
 		if message.attachments is not None:
 			for attachment in message.attachments:
 				# example file name: 1011016_hbWCv9R5.png
-				if m := search(r"^\d{7}_.{8}\.png$", attachment.filename):
+				if m := search(r"^(\d+)_.+\.png$", attachment.filename):
 					await message.channel.send(
 						"https://picrew.me/image_maker/{}".format(m.group(0))
 					)
