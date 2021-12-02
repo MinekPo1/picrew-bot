@@ -15,8 +15,7 @@ async def on_ready():
 		print("Unable to access channel!")
 	await dc.change_presence(activity=discord.Activity(
 				type=discord.ActivityType.listening,
-				name=" to ppl who want to get a picrew link!",
-				details="reply to a message with search or react with :mag:!"
+				name=" to get a picrew link requests!"
 	))
 	print("logged in as {}".format(dc.user))
 
@@ -52,6 +51,10 @@ async def on_message(message:discord.Message):
 					)
 					# )
 				return
+	if dc.user in message.mentions and "invite" in message.content.lower():
+		await message.channel.send(
+			discord.utils.oauth_url(dc.user.id, 68608)
+		)
 
 
 @dc.event
