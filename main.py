@@ -14,7 +14,7 @@ webhook = ("https://discord.com/api/webhooks/"
 @dc.event
 async def on_ready():
 	requests.get(webhook, json={"content": "Bot is online."})
-	channel = dc.get_channel("805214055643349003")
+	channel = dc.get_channel(805214055643349003)
 	if channel is not None:
 		channel.send("Bot is online!")
 	else:
@@ -36,7 +36,7 @@ async def on_message(message:discord.Message):
 				# example file name: 1011016_hbWCv9R5.png
 				if m := search(r"^(\d+)_.+\.png$", attachment.filename):
 					await message.channel.send(
-						"https://picrew.me/image_maker/{}".format(m.group(0))
+						"https://picrew.me/image_maker/{}".format(m.group(1))
 					)
 					return
 				else:
