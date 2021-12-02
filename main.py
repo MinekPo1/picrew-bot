@@ -1,12 +1,15 @@
 import os
 from re import search
 import discord
+import requests
 
 dc = discord.Client()
 
+webhook = "https://discord.com/api/webhooks/916097212482744381/0RRUdfJAgJVcf5TEKXQTVnlo3yVWSYeq91CwEFYZ3ePDeyB7IqApsvUMYSmg66r4e61F"
 
 @dc.event
 async def on_ready():
+	requests.get(webhook, json={"content": "Bot is online."})
 	channel = dc.get_channel("805214055643349003")
 	if channel is not None:
 		channel.send("Bot is online!")
