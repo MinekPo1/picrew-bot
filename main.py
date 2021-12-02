@@ -7,6 +7,7 @@ dc = discord.Client()
 
 webhook = "https://discord.com/api/webhooks/916097212482744381/0RRUdfJAgJVcf5TEKXQTVnlo3yVWSYeq91CwEFYZ3ePDeyB7IqApsvUMYSmg66r4e61F"
 
+
 @dc.event
 async def on_ready():
 	requests.get(webhook, json={"content": "Bot is online."})
