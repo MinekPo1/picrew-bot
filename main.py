@@ -2,6 +2,7 @@ import os
 from re import search
 from typing import Union, cast
 import discord
+from discord.embeds import Embed
 import requests
 
 dc = discord.Client()
@@ -41,27 +42,34 @@ async def scan(
 		r = requests.get("https://picrew.me/image_maker/{}".format(id))
 		if r.ok:
 			if always_delete:
-				mes = await channel.send(
-					"here: https://picrew.me/image_maker/{}".format(id),
+				await channel.send(
+					embed=Embed(
+						description="here: https://picrew.me/image_maker/{}".format(id),
+					),
 					delete_after=5
 				)
 			else:
-				mes = await channel.send(
-					"here: https://picrew.me/image_maker/{}".format(id)
+				await channel.send(
+					embed=Embed(
+						description="here: https://picrew.me/image_maker/{}".format(id)
+					)
 				)
 		else:
-			mes = await channel.send(
-				"sadly got a {} :( picrew id: {}".format(r.status_code,id),
-				# )
+			await channel.send(
+				embed=Embed(
+					descition="sadly got a {} :( picrew id: {}".format(r.status_code,id),
+					# )
+				),
 				delete_after=5
 			)
 	else:
-		mes = await channel.send(
-			"Unable to get picrew id, sorry :(.",
+		await channel.send(
+			embed=Embed(
+				descition="Unable to get picrew id, sorry :(."
+				# )
+			),
 			delete_after=5
 		)
-		# )
-	await mes.edit(supress=True)
 
 
 @dc.event
