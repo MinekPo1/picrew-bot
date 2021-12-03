@@ -104,13 +104,26 @@ async def on_message(message:discord.Message):
 
 
 @dc.event
-async def on_reaction_add(reaction:discord.Reaction, user:discord.User):
-	if "picrew" in reaction.message.channel.name.lower()\
-			and reaction.emoji == "🔍" and reaction.message.attachments is not None:
-		message = reaction.message
+async def on_raw_reaction_add(data:discord.RawReactionActionEvent):
+	if data.event_type != "REACTION_ADD":
+		return
+
+	channel = dc.get_channel(data.channel_id)
+	if channel is None:
+		return
+	message = await channel.fetch_message(data.message_id)
+	if not(isinstance(message,discord.Message)):
+		return
+
+	if "picrew" in channel.name.lower()\
+			and data.emoji == "🔍" and message.attachments is not None:
+		user = dc.get_user(data.user_id)
 		await scan(
 			message, message.channel,
-			always_delete=not(user.permissions_in(message.channel).send_messages)
+			always_delete=(
+				user is not None
+				and not(user.permissions_in(message.channel).send_messages)
+			)
 		)
 
 dc.run(os.getenv("TOKEN"))
