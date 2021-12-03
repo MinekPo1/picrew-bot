@@ -137,7 +137,6 @@ async def on_message(message:discord.Message):
 async def on_raw_reaction_add(data:discord.RawReactionActionEvent):
 	if data.event_type != "REACTION_ADD":
 		return
-	print("got reaction:{!r}".format(data.emoji))
 
 	channel = dc.get_channel(data.channel_id)
 	if channel is None:
@@ -147,13 +146,9 @@ async def on_raw_reaction_add(data:discord.RawReactionActionEvent):
 	if not(isinstance(message,discord.Message)):
 		return
 
-	print("got message:",message)
-	print("has attachments:",message.attachments is not None)
-
 	if "picrew" in channel.name.lower()\
 			and data.emoji.name == "🔍" and message.attachments is not None:
 		user = dc.get_user(data.user_id)
-		print("off to scan...")
 		await scan(
 			message, message.channel,
 			always_delete=(
