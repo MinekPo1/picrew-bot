@@ -61,7 +61,7 @@ async def scan(
 			delete_after=5
 		)
 		# )
-	mes.edit(supress=True)
+	await mes.edit(supress=True)
 
 
 @dc.event
