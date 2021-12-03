@@ -1,5 +1,6 @@
 import os
 from re import search
+from typing import Union, cast
 import discord
 import requests
 
@@ -20,41 +21,86 @@ async def on_ready():
 	print("logged in as {}".format(dc.user))
 
 
+async def scan(
+			message:Union[discord.Message,str],
+			channel:discord.TextChannel,
+			always_delete:bool = False
+		):
+	id:str = ""
+	if isinstance(message,str) or message.attachments is None:
+		if not(isinstance(message,str)):
+			message = cast(str,message.content)
+		if m:=search(r"https?://.+/(\d+)_.+\.png",message):
+			id = m.group(1)
+	else:
+		for attachment in message.attachments:
+			# example file name: 1011016_hbWCv9R5.png
+			if m := search(r"^(\d+)_.+\.png$", attachment.filename):
+				id = m.group(1)
+	if id:
+		r = requests.get("https://picrew.me/image_maker/{}".format(id))
+		if r.ok:
+			if always_delete:
+				await channel.send(
+					"here: https://picrew.me/image_maker/{}".format(id),
+					delete_after=5
+				)
+			else:
+				await channel.send(
+					"here: https://picrew.me/image_maker/{}".format(id)
+				)
+		else:
+			await channel.send(
+				"sadly got a {} :( picrew id: {}".format(r.status_code,id),
+				# )
+				delete_after=5
+			)
+	else:
+		await channel.send(
+			"Unable to get picrew id, sorry :(.",
+			delete_after=5
+		)
+		# )
+
+
 @dc.event
 async def on_message(message:discord.Message):
-	if message.author == dc.user:
+	if message.author == dc.user or dc.user is None:
 		return
 	if "picrew" in message.channel.name.lower() and message.content == "search"\
 			and message.reference is not None:
 		message = await message.channel.fetch_message(message.reference.message_id)
 		if message is None:
 			return
+		await scan(message, message.channel)
+		return
+
+	if dc.user in message.mentions:
+		if(
+				m := search(
+					r"https?://discord.com/channels/(\d+)/(\d+)/(\d+)",
+					message.content
+				)
+			):
+			channel = dc.get_channel(int(m.group(2)))
+			if channel is not None:
+				message2 = await channel.fetch_message(int(m.group(3)))
+				if message2 is not None:
+					await scan(message2, channel)
+			else:
+				await message.channel.send(
+					"Unable to fetch message!",
+					delete_after=5
+				)
+				# )
+			return
+		if "invite" in message.content.lower():
+			await message.channel.send(
+				discord.utils.oauth_url(dc.user.id, discord.Permissions(68608))
+			)
+			return
 		if message.attachments is not None:
-			for attachment in message.attachments:
-				# example file name: 1011016_hbWCv9R5.png
-				if m := search(r"^(\d+)_.+\.png$", attachment.filename):
-					r = requests.get("https://picrew.me/image_maker/{}".format(m.group(1)))
-					if r.ok:
-						await message.channel.send(
-							"here: https://picrew.me/image_maker/{}".format(m.group(1))
-						)
-					else:
-						await message.channel.send(
-							"sadly got a {} :( picrew id: {}".format(r.status_code,m.group(1)),
-							# )
-							delete_after=5
-						)
-				else:
-					await message.channel.send(
-						"Unable to get picrew id, sorry :(.",
-						delete_after=5
-					)
-					# )
-				return
-	if dc.user in message.mentions and "invite" in message.content.lower():
-		await message.channel.send(
-			discord.utils.oauth_url(dc.user.id, discord.Permissions(68608))
-		)
+			await scan(message, message.channel)
 
 
 @dc.event
@@ -62,35 +108,9 @@ async def on_reaction_add(reaction:discord.Reaction, user:discord.User):
 	if "picrew" in reaction.message.channel.name.lower()\
 			and reaction.emoji == "🔍" and reaction.message.attachments is not None:
 		message = reaction.message
-		for attachment in message.attachments:
-			# example file name: 1011016_hbWCv9R5.png
-			if m := search(r"^(\d+)_.+\.png$", attachment.filename):
-				r = requests.get("https://picrew.me/image_maker/{}".format(m.group(1)))
-				if r.ok:
-					if user.permissions_in(message.channel).send_messages:
-						await message.channel.send(
-							"here: https://picrew.me/image_maker/{}".format(m.group(1)),
-							reference=message
-						)
-					else:
-						await message.channel.send(
-							"here: https://picrew.me/image_maker/{}".format(m.group(1)),
-							reference=message,
-							delete_after=5
-						)
-				else:
-					await message.channel.send(
-						"sadly got a {} :( picrew id: {}".format(r.status_code,m.group(1)),
-						# )
-						reference=message,
-						delete_after=5
-					)
-			else:
-				await message.channel.send(
-					"Unable to get picrew id, sorry :(.",
-					delete_after=5
-				)
-				# )
-			return
+		await scan(
+			message, message.channel,
+			always_delete=not(user.permissions_in(message.channel).send_messages)
+		)
 
 dc.run(os.getenv("TOKEN"))
