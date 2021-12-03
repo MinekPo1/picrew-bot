@@ -38,16 +38,16 @@ async def scan(
 			if m := search(r"^(\d+)_.+\.png$", attachment.filename):
 				id = m.group(1)
 	if id:
-		r = requests.get("https://picrew.me/image_maker/{}".format(id))
+		r = requests.get("<https://picrew.me/image_maker/{}>".format(id))
 		if r.ok:
 			if always_delete:
 				await channel.send(
-					"here: https://picrew.me/image_maker/{}".format(id),
+					"here: <https://picrew.me/image_maker/{}>".format(id),
 					delete_after=5
 				)
 			else:
 				await channel.send(
-					"here: https://picrew.me/image_maker/{}".format(id)
+					"here: <https://picrew.me/image_maker/{}>".format(id)
 				)
 		else:
 			await channel.send(
